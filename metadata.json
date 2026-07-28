@@ -1,0 +1,6 @@
+{
+  "name": "RealtyConnect",
+  "description": "RealtyConnect is India's Integrated Real Estate Business Network—a unified platform where every stakeholder in the real estate ecosystem can discover, connect, collaborate, buy, sell, hire, finance, and manage business operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
