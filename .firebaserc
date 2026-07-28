@@ -1,0 +1,16 @@
+{
+  "projects": {
+    "default": "multisarv-webapps",
+    "prod": "multisarv-webapps"
+  },
+  "targets": {
+    "multisarv-webapps": {
+      "hosting": {
+        "RealtyConnect": [
+          "realtyconnect"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
