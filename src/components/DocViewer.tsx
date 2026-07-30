@@ -148,7 +148,7 @@ export default function DocViewer({ onLogTriggered }: DocViewerProps) {
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-bold uppercase tracking-wider rounded-md">
-              Phase 01 Artifact
+              Foundation Artifact
             </span>
             <span className="text-[10px] text-slate-500 font-mono">Status: LOCKED (APPROVED)</span>
           </div>

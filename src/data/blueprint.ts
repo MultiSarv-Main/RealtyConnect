@@ -12,7 +12,7 @@ The Platform Foundation Module constitutes the digital bedrock of RealtyConnect.
 ## 2. Business Objectives
 - **Zero-Trust Security**: Ensure that every business transaction, API request, and data access is validated and authorized.
 - **Durable Traceability**: Implement an unalterable audit trail that satisfies RERA compliance, financial audits, and enterprise-grade security standards.
-- **Consistent Master Data**: Establish a single source of truth for global values (geographies, currency, project phases) to prevent master data redundancy and integrity errors.
+- **Consistent Master Data**: Establish a single source of truth for global values (geographies, currency, project lifecycle states) to prevent master data redundancy and integrity errors.
 - **Decoupled Architecture**: Provide standardized APIs for notifications and file storage, shielding domain modules from direct infrastructural dependencies.
 
 ## 3. Scope
@@ -26,9 +26,9 @@ The Platform Foundation Module constitutes the digital bedrock of RealtyConnect.
 
 ### Out-of-Scope (Deferred to Later Domains)
 - **User-Facing Registration Forms**: Multi-step registration flows and business profile wizard screens belong to the **Registration Module**.
-- **External Identity Provider Sync**: SSO federation (Azure AD, Okta, Google Workspace for business users) is deferred to Enterprise phase.
+- **External Identity Provider Sync**: SSO federation (Azure AD, Okta, Google Workspace for business users) is deferred to the Enterprise release stage.
 - **Direct Physical File Scanning**: The physical file stream is scanned by isolated background cloud tasks; the platform database only acts as the registry and validation gate.
-- **Predictive AI Insights**: No predictive analytics or intelligent logging are supported in this phase.
+- **Predictive AI Insights**: Predictive analytics and intelligent logging are not included in the current release scope.
 
 ## 4. Stakeholder Impact
 - **Platform Owner / Administrator**: Full operational visibility via audit logs and administrative authority over global configs and master data.
