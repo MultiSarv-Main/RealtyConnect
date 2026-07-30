@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { STAKEHOLDER_ROLES } from '../data/blueprint';
 
-interface AuthSimulatorProps {
+interface AuthGatewayProps {
   onLogTriggered: (action: string, entity: string, entityId: string, status: 'SUCCESS' | 'FAILURE' | 'WARNING', details: string) => void;
   onSessionChanged: (user: { email: string; role: string; permissions: string[] } | null) => void;
   maintenanceMode: boolean;
@@ -31,12 +31,12 @@ const SAMPLE_USERS = [
   { email: 'contractor@realtyconnect.com', password: 'Contractor@123', roles: ['CONTRACTOR', 'MATERIAL_SUPPLIER'] }
 ];
 
-export default function AuthSimulator({ onLogTriggered, onSessionChanged, maintenanceMode, showToast }: AuthSimulatorProps) {
+export default function AuthGateway({ onLogTriggered, onSessionChanged, maintenanceMode, showToast }: AuthGatewayProps) {
   // Authentication Form State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
-  // Simulation States
+  // Session Security States
   const [loggedInUser, setLoggedInUser] = useState<{ email: string; roles: string[]; currentRole: string } | null>(null);
   const [failedAttempts, setFailedAttempts] = useState<{ [email: string]: number }>({});
   const [lockoutTimers, setLockoutTimers] = useState<{ [email: string]: number }>({}); // Countdown in seconds
@@ -107,7 +107,7 @@ export default function AuthSimulator({ onLogTriggered, onSessionChanged, mainte
 
       if (attempts >= 5) {
         // Trigger lockout
-        setLockoutTimers(prev => ({ ...prev, [email]: 30 })); // 30 seconds for simulator (reps 30 mins)
+        setLockoutTimers(prev => ({ ...prev, [email]: 30 }));
         setFailedAttempts(prev => ({ ...prev, [email]: 0 }));
         onLogTriggered(
           'SECURITY_BRUTE_FORCE_LOCKOUT', 
@@ -129,7 +129,7 @@ export default function AuthSimulator({ onLogTriggered, onSessionChanged, mainte
     const defaultRole = user.roles[0];
     const loggedIn = { email: user.email, roles: user.roles, currentRole: defaultRole };
     setLoggedInUser(loggedIn);
-    setSessionExpiry(90); // 90 seconds for simulator (reps 15 minutes session limit)
+    setSessionExpiry(90);
     
     onLogTriggered(
       'AUTH_LOGIN_SUCCESS', 
@@ -224,7 +224,7 @@ export default function AuthSimulator({ onLogTriggered, onSessionChanged, mainte
   ];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5" id="auth-simulator-root">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5" id="auth-gateway-root">
       {/* Auth Form and User Selector */}
       <div className="lg:col-span-5 flex flex-col gap-5">
         <div className="p-5 bg-slate-900/30 border border-slate-800 rounded-xl flex flex-col justify-between">
@@ -234,7 +234,7 @@ export default function AuthSimulator({ onLogTriggered, onSessionChanged, mainte
               Unified Identity Console
             </h3>
             <p className="text-xs text-slate-400 mt-1">
-              Simulates credential-based gateway entry. Test lockout rules, session timings, and role contexts.
+              Secure credential gateway with role context, lockout controls, and session governance.
             </p>
           </div>
 
@@ -346,25 +346,18 @@ export default function AuthSimulator({ onLogTriggered, onSessionChanged, mainte
           )}
         </div>
 
-        {/* Demo Users List Box */}
-        <div className="p-4 bg-slate-900/10 border border-slate-850 rounded-xl" id="demo-credentials">
-          <h4 className="font-display font-medium text-xs text-slate-400 uppercase tracking-wider mb-3">Pre-Configured Identity Profiles</h4>
+        <div className="p-4 bg-slate-900/10 border border-slate-850 rounded-xl" id="identity-profiles">
+          <h4 className="font-display font-medium text-xs text-slate-400 uppercase tracking-wider mb-3">Authorized Identity Profiles</h4>
           <div className="space-y-2">
             {SAMPLE_USERS.map((user, uIdx) => {
               const lockoutTime = lockoutTimers[user.email] || 0;
               return (
                 <div 
                   key={uIdx}
-                  onClick={() => {
-                    if (lockoutTime > 0) return;
-                    setEmail(user.email);
-                    setPassword(user.password);
-                    onLogTriggered('PREFILL_DEMO_CREDENTIALS', 'demo_helper', user.email, 'SUCCESS', `Prefilling console for: ${user.email}`);
-                  }}
-                  className={`p-2.5 rounded border text-xs font-mono transition-all cursor-pointer ${
+                  className={`p-2.5 rounded border text-xs font-mono transition-all ${
                     lockoutTime > 0 
-                      ? 'bg-red-950/20 border-red-900/40 opacity-70 cursor-not-allowed' 
-                      : 'bg-slate-900/30 hover:bg-slate-900/60 border-slate-800/60 hover:border-slate-800'
+                      ? 'bg-red-950/20 border-red-900/40 opacity-70' 
+                      : 'bg-slate-900/30 border-slate-800/60'
                   }`}
                 >
                   <div className="flex justify-between items-center mb-1">
@@ -381,7 +374,7 @@ export default function AuthSimulator({ onLogTriggered, onSessionChanged, mainte
                     )}
                   </div>
                   <div className="flex justify-between text-slate-450 text-[10px]">
-                    <span>Password: <span className="text-slate-300 font-bold">{user.password}</span></span>
+                    <span>Credential Visibility: <span className="text-slate-300 font-bold">Protected</span></span>
                   </div>
                 </div>
               );

@@ -97,11 +97,6 @@ export default function App() {
   // Active time state for top bar
   const [currentTime, setCurrentTime] = useState(new Date().toISOString().replace('T', ' ').substr(0, 19));
 
-  // Governance Sign-off State
-  const [signOffName, setSignOffName] = useState('');
-  const [isSignedOff, setIsSignedOff] = useState(false);
-  const [showSignOffModal, setShowSignOffModal] = useState(false);
-
   // Stateful custom toast alert container (non-blocking for iframes)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
@@ -226,30 +221,6 @@ export default function App() {
   const maintenanceModeActive = configs.find(c => c.key === 'MAINTENANCE_MODE')?.value === 'true';
   const maxUploadSizeMb = parseInt(configs.find(c => c.key === 'MAX_UPLOAD_SIZE_MB')?.value || '10', 10);
 
-  const handleGovernanceSignOff = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!signOffName.trim()) return;
-
-    setIsSignedOff(true);
-    setShowSignOffModal(false);
-
-    triggerLog(
-      'GOVERNANCE_PHASE_01_SIGN_OFF',
-      'project_constitution',
-      'phase_01_platform_foundation',
-      'SUCCESS',
-      `PROJECT EXECUTIVE MANDATE: Approved and signed off on the complete Platform Foundation Package by stakeholder "${signOffName}". Transitioning platform lock to APPROVED.`
-    );
-
-    triggerNotification(
-      'email',
-      'governance@realtyconnect.com',
-      `Executive Approval Issued: Platform Foundation Phase 01 has been officially signed off and approved by ${signOffName}. Ready for Registration Module.`
-    );
-
-    showToast(`Governance Sign-Off Approved! Sealing complete Platform Foundation Block under cryptographic hash chain.`, 'success');
-  };
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950">
       
@@ -326,12 +297,10 @@ export default function App() {
                 </span>
               )}
 
-              {isSignedOff && (
-                <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold text-[10px]">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  PHASE 01 SIGNED OFF
-                </span>
-              )}
+              <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold text-[10px]">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                PRODUCTION BASELINE READY
+              </span>
 
               <button
                 id="dev-theme-toggle"
@@ -371,48 +340,21 @@ export default function App() {
           {/* Main Container */}
           <div className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
             
-            {/* Sign-off banner if not signed off */}
-            {!isSignedOff ? (
-              <div className="p-4 bg-slate-900/40 border border-emerald-500/20 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg">
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 mt-1">
-                    <Sparkles className="w-5 h-5 animate-pulse" />
-                  </div>
-                  <div>
-                    <h4 className="font-display font-bold text-sm text-slate-100 flex items-center gap-1.5">
-                      Phase 1 Sign-Off Required
-                    </h4>
-                    <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
-                      Review the complete implementation package (blueprints, tables, core API rosters). Once satisfied, approve and officially sign off on the Platform Foundation to transition development to the Registration Module.
-                    </p>
-                  </div>
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <FileCheck className="w-4 h-4" />
                 </div>
-
-                <button
-                  onClick={() => setShowSignOffModal(true)}
-                  id="btn-trigger-signoff"
-                  className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-2 rounded text-xs transition-colors shadow-lg font-mono tracking-tight flex-shrink-0"
-                >
-                  Sign Off Foundation Block
-                </button>
-              </div>
-            ) : (
-              <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                    <FileCheck className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="font-display font-semibold text-xs text-slate-100">Platform Foundation Approved</p>
-                    <p className="text-[11px] text-slate-400">The unalterable sign-off transaction has been permanently registered. System is primed for Phase 2: Registration Module.</p>
-                  </div>
+                <div>
+                  <p className="font-display font-semibold text-xs text-slate-100">Foundation Workspace Ready</p>
+                  <p className="text-[11px] text-slate-400">Core modules are available for operations, onboarding, and governance workflows.</p>
                 </div>
-
-                <span className="text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">
-                  STATUS: READY
-                </span>
               </div>
-            )}
+
+              <span className="text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">
+                STATUS: READY
+              </span>
+            </div>
 
             {/* Dashboard Bento Hub Tabs */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-1.5 p-1 bg-slate-900 border border-slate-850 rounded-xl">
@@ -577,58 +519,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Governance Sign-Off Modal popup */}
-      {showSignOffModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in" id="signoff-modal">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 max-w-md w-full shadow-2xl space-y-4">
-            <div>
-              <h3 className="font-display font-bold text-lg text-slate-100 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                Governance Sign-Off Mandate
-              </h3>
-              <p className="text-xs text-slate-400 mt-1">
-                By typing your executive name and signing off below, you confirm that the Platform Foundation Module (Phase 01) technical package, data structures, and rules comply fully with standard governance criteria.
-              </p>
-            </div>
-
-            <form onSubmit={handleGovernanceSignOff} className="space-y-4" id="form-signoff">
-              <div>
-                <label className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1.5">Signatory Executive Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Stakeholder / Lead Architect Name"
-                  value={signOffName}
-                  onChange={(e) => setSignOffName(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded px-3 py-2 text-sm text-slate-200 outline-none transition-all placeholder:text-slate-650"
-                />
-              </div>
-
-              <div className="p-3 bg-slate-950 border border-slate-850 rounded text-[10px] text-slate-400 font-mono leading-relaxed">
-                🚨 This sign-off action will register a High-Priority, tamper-proof record in the compliance database, irreversibly chaining and sealing the Platform Foundation Phase.
-              </div>
-
-              <div className="flex items-center justify-end gap-2 text-xs">
-                <button
-                  type="button"
-                  id="btn-cancel-signoff"
-                  onClick={() => setShowSignOffModal(false)}
-                  className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded text-slate-400 hover:text-slate-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  id="btn-submit-signoff"
-                  className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded shadow-lg font-mono"
-                >
-                  Seal & Approve Phase 01
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
