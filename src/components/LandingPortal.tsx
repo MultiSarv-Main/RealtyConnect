@@ -150,6 +150,19 @@ const NAVIGATION_GROUPS: NavGroup[] = [
   }
 ];
 
+const ROLE_NAV_ACCESS: Record<string, NavItem['id'][]> = {
+  ADMIN: NAVIGATION_GROUPS.flatMap(group => group.items.map(item => item.id)),
+  BUILDER: ['dashboard', 'directory', 'feed', 'network_dashboard', 'messaging', 'meetings', 'opportunities', 'rfq_management', 'projects', 'procurement', 'lead_management', 'crm', 'marketplace'],
+  CONTRACTOR: ['dashboard', 'directory', 'feed', 'network_dashboard', 'messaging', 'meetings', 'projects', 'rfq_management', 'opportunities', 'lead_management', 'crm'],
+  MATERIAL_SUPPLIER: ['dashboard', 'directory', 'feed', 'network_dashboard', 'messaging', 'meetings', 'marketplace', 'inventory', 'rfq_management', 'opportunities', 'lead_management'],
+  CONSULTANT: ['dashboard', 'directory', 'feed', 'network_dashboard', 'messaging', 'meetings', 'lead_management', 'crm', 'security_compliance'],
+  BANK: ['dashboard', 'directory', 'feed', 'network_dashboard', 'messaging', 'meetings', 'lead_management', 'finance', 'crm'],
+  RECRUITER: ['dashboard', 'directory', 'feed', 'network_dashboard', 'messaging', 'meetings', 'hr_dms', 'lead_management'],
+  FACILITY_MANAGEMENT: ['dashboard', 'directory', 'feed', 'network_dashboard', 'messaging', 'meetings', 'assets_maintenance', 'projects']
+};
+
+const DEFAULT_LOGGED_IN_MODULES: NavItem['id'][] = ['dashboard', 'directory', 'feed', 'network_dashboard', 'messaging', 'meetings', 'marketplace'];
+
 interface LandingPortalProps {
   onLogTriggered: (action: string, entity: string, entityId: string, status: 'SUCCESS' | 'FAILURE' | 'WARNING', details: string) => void;
   userSession: { 
@@ -342,7 +355,7 @@ export default function LandingPortal({
   // Ecosystem Guide State
   const [isGuideCollapsed, setIsGuideCollapsed] = useState(false);
 
-  // Simulated Roles for Sandbox Interactive Flow
+  // Role Profiles for Quick Access Flow
   const QUICK_ROLES = [
     {
       title: 'Builder / Developer',
@@ -428,7 +441,7 @@ export default function LandingPortal({
     if (onLogin) {
       onLogin(email, role, permissions, subPlan, orgName, reraReg);
       setActiveViewMode(defaultView);
-      showToast(`Logged in successfully as simulated ${role}. View shifted to active workspace!`, 'success');
+      showToast(`Logged in successfully as ${role}. Workspace activated.`, 'success');
       onLogTriggered(
         'AUTH_LOGIN_SUCCESS',
         'users',
@@ -566,13 +579,36 @@ export default function LandingPortal({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin');
 
-  // Simulation states for authentication gate (Sprint 29)
-  const [authEmail, setAuthEmail] = useState('builder@realtyconnect.com');
+  // Authentication state for enterprise access
+  const [authEmail, setAuthEmail] = useState('');
   const [authRole, setAuthRole] = useState('BUILDER');
-  const [authOrgName, setAuthOrgName] = useState('Apex Developers Ltd');
+  const [authOrgName, setAuthOrgName] = useState('');
   const [authSubPlan, setAuthSubPlan] = useState('Platinum Developer License');
-  const [authRera, setAuthRera] = useState('RERA-MH-90432');
+  const [authRera, setAuthRera] = useState('');
   const [authDefaultView, setAuthDefaultView] = useState('dashboard');
+
+  const allowedModuleIds = React.useMemo(() => {
+    if (!userSession) return new Set<NavItem['id']>();
+    const modules = ROLE_NAV_ACCESS[userSession.role] || DEFAULT_LOGGED_IN_MODULES;
+    return new Set<NavItem['id']>(modules);
+  }, [userSession]);
+
+  const visibleNavigationGroups = React.useMemo(
+    () =>
+      NAVIGATION_GROUPS.map(group => ({
+        ...group,
+        items: userSession ? group.items.filter(item => allowedModuleIds.has(item.id)) : group.items
+      })).filter(group => group.items.length > 0),
+    [userSession, allowedModuleIds]
+  );
+
+  React.useEffect(() => {
+    if (!userSession || activeViewMode === 'home') return;
+    if (!allowedModuleIds.has(activeViewMode as NavItem['id'])) {
+      setActiveViewMode('dashboard');
+      showToast('Access updated based on your active role policy.', 'info');
+    }
+  }, [activeViewMode, userSession, allowedModuleIds, showToast]);
 
   // Sidebar States for Premium Enterprise Navigation
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
@@ -1192,7 +1228,7 @@ export default function LandingPortal({
 
   const handleSendConnection = (businessId: string, name: string, category: string, location: string, logoBg: string, purpose: string) => {
     if (!userSession) {
-      showToast('Please sign in or select a simulated business role to dispatch connection handshakes.', 'info');
+      showToast('Please sign in or select your business role to dispatch connection handshakes.', 'info');
       setAuthModalTab('signin');
       setIsAuthModalOpen(true);
       return;
@@ -1412,7 +1448,7 @@ export default function LandingPortal({
 
   const handleSendEnquiry = (businessId: string, name: string, subject: string, category: string, message: string, email: string, phone: string) => {
     if (!userSession) {
-      showToast('Please sign in or select a simulated business role to send secure business inquiries.', 'info');
+      showToast('Please sign in or select your business role to send secure business inquiries.', 'info');
       setAuthModalTab('signin');
       setIsAuthModalOpen(true);
       return;
@@ -1450,7 +1486,7 @@ export default function LandingPortal({
       priority: 'High'
     });
 
-    // High fidelity callback simulation
+    // High fidelity callback response
     setTimeout(() => {
       setEnquiries(current => current.map(enq => {
         if (enq.id === newEnq.id) {
@@ -1467,7 +1503,7 @@ export default function LandingPortal({
 
   const handleScheduleMeeting = (businessId: string, name: string, title: string, date: string, time: string, type: string) => {
     if (!userSession) {
-      showToast('Please sign in or select a simulated business role to schedule corporate consultations.', 'info');
+      showToast('Please sign in or select your business role to schedule corporate consultations.', 'info');
       setAuthModalTab('signin');
       setIsAuthModalOpen(true);
       return;
@@ -1544,7 +1580,7 @@ export default function LandingPortal({
 
   const handleSendPartnership = (businessId: string, name: string, type: 'partnership' | 'dealer' | 'distributor', terms: string, value: string, scope: string) => {
     if (!userSession) {
-      showToast('Please sign in or select a simulated business role to file channel partnerships.', 'info');
+      showToast('Please sign in or select your business role to file channel partnerships.', 'info');
       setAuthModalTab('signin');
       setIsAuthModalOpen(true);
       return;
@@ -1746,7 +1782,7 @@ export default function LandingPortal({
     showToast(`Unblocked company ${target.businessName}`, 'success');
   };
 
-  // Connect request simulation
+  // Connect request workflow
   const handleConnectRequest = (businessId: string, businessName: string) => {
     const target = DISCOVERY_REGISTRY.find(b => b.id === businessId);
     if (!target) return;
@@ -2684,7 +2720,7 @@ export default function LandingPortal({
                       <button
                         onClick={() => {
                           setIsProfileMenuOpen(false);
-                          showToast('Simulated Corporate Session Logout. Security logs saved.', 'success');
+                          showToast('Corporate session logged out. Security logs saved.', 'success');
                           onLogTriggered('ENTERPRISE_USER_LOGGED_OUT', 'session', 'user', 'SUCCESS', 'Profile Dropdown: Safe session reset requested.');
                           onLogout?.();
                         }}
@@ -3132,7 +3168,7 @@ export default function LandingPortal({
       </section>
       )}
 
-      {/* Dynamic Sandbox Quick-Start & Interactive System Flow Guide */}
+      {/* Dynamic Quick-Start & Interactive System Flow Guide */}
       {!userSession && (
       <section className="px-4 md:px-6 py-8 bg-slate-900/50 border-b border-slate-850">
         <div className="max-w-7xl mx-auto">
@@ -3149,13 +3185,13 @@ export default function LandingPortal({
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white flex items-center gap-2 font-display">
-                    Ecosystem Interactive Flow & Sandbox Guide
+                    Ecosystem Interactive Flow Guide
                     <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-1.5 py-0.5 rounded font-mono font-bold tracking-wider">
                       QUICK START
                     </span>
                   </h3>
                   <p className="text-xs text-slate-400 mt-1 max-w-3xl leading-relaxed">
-                    This is an advanced B2B multi-role enterprise simulation platform. Read this simple 3-step interactive flow to see how different stakeholder operations, project modules, and unalterable audit trails work!
+                    This is an advanced B2B multi-role enterprise platform. Read this simple 3-step interactive flow to see how stakeholder operations, project modules, and unalterable audit trails work.
                   </p>
                 </div>
               </div>
@@ -3203,7 +3239,7 @@ export default function LandingPortal({
                     </div>
                     
                     <h4 className="text-sm font-bold text-white mt-3 font-display">
-                      Choose Your Simulated Business Role
+                      Choose Your Business Role
                     </h4>
                     <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                       Click any role below to instantly authenticate and log in as that persona. The entire platform will customize itself automatically:
@@ -3357,13 +3393,13 @@ export default function LandingPortal({
                     ) : (
                       <div className="text-center py-6 bg-slate-900/40 rounded-xl border border-dashed border-slate-800 text-slate-500">
                         <Lock className="w-8 h-8 mx-auto text-slate-600 mb-2" />
-                        <span className="text-xs">Log in as a simulated role in Step 1 to activate and explore modules!</span>
+                        <span className="text-xs">Log in with your role in Step 1 to activate and explore modules.</span>
                       </div>
                     )}
                   </div>
 
                   <div className="text-[10px] text-slate-500 font-mono text-center">
-                    All operations run in local sandboxed memory.
+                    All operations run with active session context.
                   </div>
                 </div>
 
@@ -3388,7 +3424,7 @@ export default function LandingPortal({
                     </p>
                   </div>
 
-                  {/* Blockchain simulation style */}
+                  {/* Immutable audit chain style */}
                   <div className="bg-slate-950/80 border border-slate-850 rounded-xl p-3.5 space-y-2 font-mono text-[9.5px]">
                     <div className="text-slate-500 border-b border-slate-900 pb-1 flex items-center justify-between">
                       <span>SECURE LOG CHAIN</span>
@@ -3423,7 +3459,7 @@ export default function LandingPortal({
                   </div>
 
                   <div className="text-[10.5px] text-slate-400 leading-relaxed">
-                    🌟 <strong>Friend's Tip:</strong> Simply select <strong>"Builder / Developer"</strong> in Step 1 to instantly open the active Control Center dashboard and try the simulated RFQ tender flow!
+                    🌟 <strong>Quick Tip:</strong> Select <strong>"Builder / Developer"</strong> in Step 1 to open the Control Center dashboard and initiate the RFQ tender flow.
                   </div>
                 </div>
 
@@ -3512,7 +3548,7 @@ export default function LandingPortal({
                     className="w-full bg-slate-950/80 border border-slate-850 rounded-lg px-2 py-1.5 text-[10px] text-slate-400 font-mono outline-none focus:border-emerald-500/50 cursor-pointer"
                   >
                     <option value="" disabled>-- Quick Jump --</option>
-                    {NAVIGATION_GROUPS.flatMap(g => g.items).map(item => (
+                    {visibleNavigationGroups.flatMap(g => g.items).map(item => (
                       <option key={item.id} value={item.id}>
                         {item.label}
                       </option>
@@ -3532,7 +3568,7 @@ export default function LandingPortal({
                       <Pin className="w-2.5 h-2.5 text-slate-600" />
                     </h5>
                     <div className="space-y-0.5">
-                      {NAVIGATION_GROUPS.flatMap(g => g.items)
+                      {visibleNavigationGroups.flatMap(g => g.items)
                         .filter(item => pinnedModules.includes(item.id))
                         .map(item => {
                           const Icon = item.icon;
@@ -3581,7 +3617,7 @@ export default function LandingPortal({
                       <Star className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />
                     </h5>
                     <div className="space-y-0.5">
-                      {NAVIGATION_GROUPS.flatMap(g => g.items)
+                      {visibleNavigationGroups.flatMap(g => g.items)
                         .filter(item => favoriteModules.includes(item.id))
                         .map(item => {
                           const Icon = item.icon;
@@ -3629,7 +3665,7 @@ export default function LandingPortal({
                       <Clock className="w-2.5 h-2.5 text-slate-600" />
                     </h5>
                     <div className="space-y-0.5">
-                      {NAVIGATION_GROUPS.flatMap(g => g.items)
+                      {visibleNavigationGroups.flatMap(g => g.items)
                         .filter(item => recentModules.includes(item.id) && item.id !== activeViewMode)
                         .slice(0, 3)
                         .map(item => {
@@ -3655,7 +3691,7 @@ export default function LandingPortal({
 
                 {/* 4. Core Navigation Groups */}
                 <div className="space-y-4 pt-2 border-t border-slate-850/40">
-                  {NAVIGATION_GROUPS.map((group, gIdx) => {
+                  {visibleNavigationGroups.map((group, gIdx) => {
                     // Filter items if search is active
                     const filteredItems = group.items.filter(item => 
                       item.label.toLowerCase().includes(sidebarSearch.toLowerCase()) ||
@@ -3888,7 +3924,7 @@ export default function LandingPortal({
                         </div>
                       </div>
                     ) : (
-                      NAVIGATION_GROUPS.map((group, gIdx) => (
+                      visibleNavigationGroups.map((group, gIdx) => (
                         <div key={gIdx} className="space-y-2">
                           <h5 className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase px-2">
                             {group.groupName}
@@ -4920,7 +4956,7 @@ export default function LandingPortal({
         </div>
       )}
 
-      {/* B2B Authentication & Corporate Simulation Modal Portal (Sprint 29) */}
+      {/* B2B Authentication & Corporate Access Modal Portal */}
       {isAuthModalOpen && (
         <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-50 overflow-y-auto animate-in fade-in duration-200">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative">
@@ -4996,7 +5032,7 @@ export default function LandingPortal({
                 </button>
               </div>
 
-              {/* Simulation Stakeholder Profiles Selection (Part 1: Login Flow) */}
+              {/* Stakeholder Profiles Selection */}
               <div className="space-y-4 py-4 flex-1">
                 <div>
                   <h4 className="text-xs font-bold text-slate-200">
